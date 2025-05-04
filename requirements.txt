@@ -5,3 +5,4 @@ Click==8.1.7
 dlib==19.24.2
 numpy==1.24.4
 Pillow==9.5.0
+opencv-python
