@@ -1,5 +1,5 @@
-# Start from a minimal Python image
-FROM python:3.8-slim
+# Start from a more full-featured Python image to avoid building dlib from source
+FROM python:3.8
 
 # Install system dependencies required by dlib and face_recognition
 RUN apt-get update && apt-get install -y \
@@ -14,11 +14,13 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install Python packages
+# Copy only the requirements.txt first for better Docker cache efficiency
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy the application code after installing dependencies
 COPY . .
 
 # Expose the port Flask will run on
