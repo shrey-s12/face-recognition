@@ -1,4 +1,5 @@
-FROM python:3.8-slim
+# Use full image instead of slim for dlib compatibility
+FROM python:3.8
 
 WORKDIR /app
 
