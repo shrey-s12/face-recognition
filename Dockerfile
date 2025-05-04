@@ -1,14 +1,28 @@
-# Use a base image with dlib and face_recognition pre-installed
-FROM faceassist/face-recognition:python3.8
+# Start from a minimal Python image
+FROM python:3.8-slim
 
+# Install system dependencies required by dlib and face_recognition
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    libopenblas-dev \
+    liblapack-dev \
+    libx11-dev \
+    libgtk-3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
-# Install Flask and any remaining dependencies
+# Copy requirements and install Python packages
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Copy your application code
+# Copy the application code
 COPY . .
 
-# Expose the port and start the app
+# Expose the port Flask will run on
+EXPOSE 5001
+
+# Start the Flask app
 CMD ["python", "app.py"]
