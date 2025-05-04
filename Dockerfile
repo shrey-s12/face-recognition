@@ -1,32 +1,41 @@
-# Use a more complete base image with build tools
-FROM python:3.10-bullseye
+# Use official Python image as base
+FROM python:3.10-slim
 
-# Install system dependencies required for dlib and face_recognition
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
-    libopenblas-dev \
-    liblapack-dev \
-    libx11-dev \
-    libgtk-3-dev \
-    libboost-all-dev \
-    libjpeg-dev \
-    python3-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    wget \
+    curl \
+    git \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set working directory inside the container
+# Upgrade CMake to 3.18+ (default in Debian is too old)
+RUN curl -fsSL https://github.com/Kitware/CMake/releases/download/v3.18.6/cmake-3.18.6-linux-x86_64.sh -o cmake.sh \
+    && mkdir /opt/cmake \
+    && sh cmake.sh --skip-license --prefix=/opt/cmake \
+    && ln -s /opt/cmake/bin/* /usr/local/bin/ \
+    && rm cmake.sh
+
+# Set work directory
 WORKDIR /app
 
-# Copy dependency file and install Python packages
+# Copy requirements and install dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Copy the project files
 COPY . .
 
-# Expose the port your Flask app will run on
-EXPOSE 5001
-
-# Start the app
+# Command to run the app
 CMD ["python", "app.py"]
