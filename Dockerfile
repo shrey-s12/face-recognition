@@ -1,8 +1,8 @@
-FROM python:3.8-slim
+FROM python:3.8  # FULL image, not slim
 
 WORKDIR /app
 
-# Install system dependencies for dlib and face-recognition
+# Install dependencies required for building dlib and face-recognition
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -25,14 +25,15 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Install dlib separately
+# Install dlib first (successfully builds on full Debian image)
 RUN pip install dlib==19.24.2
 
-# Copy and install other Python requirements
+# Copy requirements and install other dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application
+# Copy your application code
 COPY . .
 
+# Run the app
 CMD ["python", "app.py"]
