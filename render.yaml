@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: face-recognition-app
+    env: docker
+    region: oregon  # or choose your preferred region
+    plan: free
+    dockerfilePath: ./Dockerfile
+    buildCommand: ""  # handled by Dockerfile
+    startCommand: ""  # handled by Dockerfile
+    autoDeploy: true

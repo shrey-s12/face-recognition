@@ -1,8 +1,8 @@
-FROM python:3.8-slim
+FROM python:3.8
 
 WORKDIR /app
 
-# Install system dependencies required to build dlib and face_recognition
+# Install system dependencies for dlib
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -18,12 +18,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install Python dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+# Upgrade pip
+RUN pip install --upgrade pip
 
-# Copy the application code
+# Install dlib first (standalone)
+RUN pip install dlib==19.24.2
+
+# Then install the rest of the requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy app files
 COPY . .
 
 CMD ["python", "app.py"]
