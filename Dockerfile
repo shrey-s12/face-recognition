@@ -2,7 +2,7 @@ FROM python:3.8-slim
 
 WORKDIR /app
 
-# Install system dependencies for dlib
+# Install system dependencies required to build dlib and face_recognition
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -10,17 +10,20 @@ RUN apt-get update && apt-get install -y \
     libopenblas-dev \
     liblapack-dev \
     libx11-dev \
+    libgtk-3-dev \
+    python3-dev \
+    pkg-config \
     wget \
     unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Upgrade pip and install Python dependencies
 COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of your app
+# Copy the application code
 COPY . .
 
 CMD ["python", "app.py"]
