@@ -1,28 +1,29 @@
-FROM python:3.8  # Use full image instead of slim for dlib compatibility
+FROM python:3.8-slim
 
 WORKDIR /app
 
-# Install system dependencies required to build dlib
-RUN apt-get update && \
-    apt-get install -y \
-    cmake \
+# Install system dependencies required to build dlib and face_recognition
+RUN apt-get update && apt-get install -y \
     build-essential \
+    cmake \
+    libboost-all-dev \
     libopenblas-dev \
     liblapack-dev \
     libx11-dev \
     libgtk-3-dev \
-    libboost-all-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    python3-dev \
+    pkg-config \
+    wget \
+    unzip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dlib first (separately)
-RUN pip install dlib==19.24.2
-
-# Copy requirements and install Python packages
+# Upgrade pip and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the code
+# Copy the application code
 COPY . .
 
 CMD ["python", "app.py"]
