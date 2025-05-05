@@ -1,32 +1,35 @@
-# Use full Python image instead of slim to avoid missing system libraries
-FROM python:3.8
+# Use slim image + install only what's necessary
+FROM python:3.8-slim
 
-# Install system dependencies required by dlib and face_recognition
-RUN apt-get update && apt-get install -y \
+# Install system dependencies required for face_recognition and dlib
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     libopenblas-dev \
     liblapack-dev \
     libx11-dev \
     libgtk-3-dev \
-    libboost-all-dev \
-    && rm -rf /var/lib/apt/lists/*
+    libboost-python-dev \
+    libboost-system-dev \
+    libboost-thread-dev \
+    python3-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install Python packages
+# Copy only requirements file first to leverage Docker layer caching
 COPY requirements.txt .
 
-# Install Python dependencies (prefer binary if available)
-RUN pip install --upgrade pip
-RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
+# Upgrade pip and install dependencies with reduced memory usage
+RUN pip install --upgrade pip \
+ && pip install --prefer-binary --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy the rest of the app
 COPY . .
 
-# Expose the port Flask will run on
+# Expose Flask port
 EXPOSE 5001
 
-# Start the Flask app
+# Run the Flask app
 CMD ["python", "app.py"]
