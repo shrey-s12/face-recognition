@@ -1,7 +1,7 @@
-# Use an official Python base image
-FROM python:3.10-slim
+# Use a base image with face_recognition and dlib pre-installed
+FROM python:3.10
 
-# Install dependencies for dlib
+# Install system packages needed for face_recognition
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -12,18 +12,21 @@ RUN apt-get update && apt-get install -y \
     libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Create working directory
 WORKDIR /app
 
-# Copy project files
+# Copy the project files
 COPY . /app
 
-# Install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install face_recognition flask flask-cors
+# Install Python dependencies separately to avoid cache issues
+COPY requirements.txt .
 
-# Expose the port
+# Install Python packages
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Expose the app port
 EXPOSE 5001
 
-# Run the app
+# Start the Flask server
 CMD ["python", "app.py"]
